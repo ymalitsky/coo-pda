@@ -1,0 +1,107 @@
+#+OPTIONS: toc:nil
+
+#+TITLE: Basis pursuit
+* Performance of the primal-dual, block-coordinate and coordinate algorithms. Experiment with a Gaussian matrix.
+
+This documents contains detailed results for the basis pursuit problem
+$$\min ||x||_1 \quad \text{s.t.}\quad Ax=b, $$
+where $A \in \mathbb{R}^{m\times n}$, $x\in \mathbb{R}^n$, $b\in\mathbb{R}^m$  
+
+We compare primal-dual algorithm, block-coordinate primal-dual algorithm with batch ~d_block~, and fully coordinate primal-dual algorithm (batch = 1).
+
+For given $m,n$ we generate the matrix $A\in \mathbb{R}^{m\times n}$ as follows: $A$ is a random Gaussian matrix, i.e. every entry of $A$ drawn from the normal distribution $\mathcal{N}(0,1)$. A sparse vector $x^\dagger\in \mathbb{R}^n$ is constructed by choosing at random spr$=0.05n$ of its entries independently and uniformly from $(-10,10)$. Then we generate $b = Ax^\dagger$. The starting point
+for all algorithms is $x^0=0$.  For all methods we use the same stopping criteria:
+\begin{equation*}
+||Ax^k-b||_\infty \leq 10^{-6}\quad \text{and}\quad \mathrm{dist}(-A^Ty^k,
+\partial_{||\cdot||_1}(x^k))_\infty\leq 10^{-6}.
+\end{equation*}
+This is depicted in ~p_gap~ and ~f_gap~ in the tables respectively.
+~CPU~ and ~elapsed~ measure respectively the CPU time and the wall (elapsed) time of the running algorithms. In fact, we even did not include the time for computing $||A||$ for PDA.
+~Energy~ means the objective value at the obtained solution for each method.
+
+All methods were tested with different stepsizes: for PDA we use $\sigma = \frac{1}{2^i ||A||}$, $\tau = \frac{2^i}{||A||}$, for $i=0,\dots, 11$. And for (block-)coordinate we use $\sigma = \frac{1}{2^i n_{\text{block}}}$. However, for the PDA results in paper we always used the best $i$ among all, while for the coordinate versions only a fixed $i=11$ (that was almost always optimal).
+
+
+
+
+* Exper 0,    m=1000,  n=4000, d_block=50, spr=0.05 
+** PDA
+| i       |   6           |   3           |   4           |   5           |   6           |   7           |
+| epoch   | 777           | 904           | 822           | 797           | 777           | 833           |
+| p_gap   |   6.13453e-08 |   4.02463e-07 |   1.73728e-07 |   8.70507e-08 |   6.13453e-08 |   2.13617e-08 |
+| f_gap   |   9.05329e-07 |   8.81666e-07 |   9.57202e-07 |   8.70905e-07 |   9.05329e-07 |   9.50162e-07 |
+| cpu     |  24.2306      |  28.1838      |  25.4869      |  24.8667      |  24.2306      |  25.8074      |
+| elapsed |   6.665       |   7.74418     |   7.05838     |   6.85592     |   6.665       |   7.10301     |
+| energy  |  80.303       |  80.303       |  80.303       |  80.303       |  80.303       |  80.303       |
+* Exper 0,    m=1000,  n=4000, d_block=50, spr=0.05 
+** Block-Coo
+| i       |  11           |   5           |   6           |   7           |   8           |   9           |  10           |  11           |
+| epoch   | 108           | 716           | 400           | 241           | 166           | 131           | 112           | 108           |
+| p_gap   |   4.98049e-08 |   8.54107e-07 |   8.09551e-07 |   7.19297e-07 |   2.82905e-07 |   1.34251e-07 |   8.75627e-08 |   4.98049e-08 |
+| f_gap   |   9.97848e-07 |   8.99446e-07 |   8.85229e-07 |   7.00795e-07 |   6.65629e-07 |   7.99307e-07 |   7.66092e-07 |   9.97848e-07 |
+| cpu     |   3.75525     |  22.2568      |  12.5554      |   7.77964     |   4.9831      |   4.88453     |   3.57509     |   3.75525     |
+| elapsed |   0.997805    |   5.8884      |   3.31942     |   2.05419     |   1.27916     |   1.35089     |   0.930366    |   0.997805    |
+| energy  |  80.303       |  80.303       |  80.303       |  80.303       |  80.303       |  80.303       |  80.303       |  80.303       |
+* Exper 0,    m=1000,  n=4000, d_block=50, spr=0.05 
+** Coo
+| i       | 10           |   4           |   5           |   6           |   7           |  8           |  9           | 10           | 11           |
+| epoch   | 68           | 810           | 426           | 235           | 143           | 96           | 77           | 68           | 79           |
+| p_gap   |  3.74777e-08 |   9.7795e-07  |   9.27245e-07 |   3.81725e-07 |   5.07272e-07 |  2.1104e-07  |  8.2466e-08  |  3.74777e-08 |  2.80159e-08 |
+| f_gap   |  8.94885e-07 |   2.58754e-07 |   4.62278e-07 |   6.41906e-07 |   9.5786e-07  |  8.33698e-07 |  7.51194e-07 |  8.94885e-07 |  8.69789e-07 |
+| cpu     |  2.08988     |  23.8888      |  12.5483      |   7.05533     |   4.31069     |  2.99053     |  2.37558     |  2.08988     |  2.41781     |
+| elapsed |  2.06529     |  23.777       |  12.4906      |   7.01175     |   4.28401     |  2.9706      |  2.34889     |  2.06529     |  2.39222     |
+| energy  | 80.303       |  80.303       |  80.303       |  80.303       |  80.303       | 80.303       | 80.303       | 80.303       | 80.303       |
+* Exper 1,    m=2000,  n=8000, d_block=50, spr=0.05 
+** PDA
+| i       |   5           |   3           |   4           |   5           |   6           |   7           |
+| epoch   | 815           | 993           | 884           | 815           | 830           | 837           |
+| p_gap   |   1.45412e-07 |   2.36199e-07 |   1.60685e-07 |   1.45412e-07 |   3.643e-08   |   3.03723e-08 |
+| f_gap   |   8.71432e-07 |   9.6033e-07  |   9.87931e-07 |   8.71432e-07 |   9.36243e-07 |   8.02842e-07 |
+| cpu     |  88.5894      | 108.045       |  95.9574      |  88.5894      |  90.3074      |  90.808       |
+| elapsed |  25.3387      |  30.9887      |  27.4838      |  25.3387      |  25.8444      |  26.1871      |
+| energy  | 115.6         | 115.6         | 115.6         | 115.6         | 115.6         | 115.6         |
+* Exper 1,    m=2000,  n=8000, d_block=50, spr=0.05 
+** Block-Coo
+| i       |  11           |   6           |   7           |   8           |   9           |  10           |  11           |
+| epoch   | 103           | 572           | 321           | 200           | 140           | 112           | 103           |
+| p_gap   |   3.34895e-08 |   7.61349e-07 |   6.10936e-07 |   2.94611e-07 |   1.98686e-07 |   7.68808e-08 |   3.34895e-08 |
+| f_gap   |   8.67973e-07 |   8.53722e-07 |   9.23867e-07 |   7.99403e-07 |   9.53442e-07 |   9.43e-07    |   8.67973e-07 |
+| cpu     |  11.951       |  63.3347      |  36.356       |  23.5175      |  16.268       |  13.0452      |  11.951       |
+| elapsed |   3.16373     |  16.7954      |   9.63964     |   6.27961     |   4.34478     |   3.43292     |   3.16373     |
+| energy  | 115.6         | 115.6         | 115.6         | 115.6         | 115.6         | 115.6         | 115.6         |
+* Exper 1,    m=2000,  n=8000, d_block=50, spr=0.05 
+** Coo
+| i       |  11           |   5           |   6           |   7           |   8           |   9           |  10           |  11           |
+| epoch   |  73           | 762           | 405           | 228           | 140           | 100           |  80           |  73           |
+| p_gap   |   3.14048e-08 |   9.41669e-07 |   9.58828e-07 |   7.5407e-07  |   2.74884e-07 |   1.32559e-07 |   7.59158e-08 |   3.14048e-08 |
+| f_gap   |   8.99929e-07 |   4.44541e-07 |   5.91678e-07 |   9.17498e-07 |   9.46684e-07 |   7.34594e-07 |   8.08253e-07 |   8.99929e-07 |
+| cpu     |   7.26716     |  72.9096      |  38.966       |  22.2859      |  13.7566      |   9.82548     |   7.96809     |   7.26716     |
+| elapsed |   7.18553     |  72.7029      |  38.8388      |  22.2117      |  13.6833      |   9.73492     |   7.88665     |   7.18553     |
+| energy  | 115.6         | 115.6         | 115.6         | 115.6         | 115.6         | 115.6         | 115.6         | 115.6         |
+* Exper 2,    m=4000,  n=16000, d_block=50, spr=0.05 
+** PDA
+| i       |   6           |   4           |   5           |   6           |   7           |
+| epoch   | 829           | 937           | 855           | 829           | 911           |
+| p_gap   |   4.99304e-08 |   2.11754e-07 |   8.05087e-08 |   4.99304e-08 |   1.78267e-08 |
+| f_gap   |   9.35199e-07 |   9.4699e-07  |   9.56894e-07 |   9.35199e-07 |   9.19306e-07 |
+| cpu     | 333.364       | 368.258       | 343.9         | 333.364       | 367.654       |
+| elapsed | 100.153       | 114.347       | 103.376       | 100.153       | 110.031       |
+| energy  | 165.416       | 165.416       | 165.416       | 165.416       | 165.416       |
+* Exper 2,    m=4000,  n=16000, d_block=50, spr=0.05 
+** Block-Coo
+| i       |  11           |   7           |   8           |   9           |  10           |  11           |
+| epoch   | 107           | 563           | 314           | 191           | 133           | 107           |
+| p_gap   |   4.93515e-08 |   9.03012e-07 |   3.88727e-07 |   3.03587e-07 |   1.19899e-07 |   4.93515e-08 |
+| f_gap   |   8.44893e-07 |   7.76665e-07 |   9.21696e-07 |   9.34221e-07 |   8.34017e-07 |   8.44893e-07 |
+| cpu     |  50.7871      | 253.746       | 144.797       |  87.7542      |  62.4872      |  50.7871      |
+| elapsed |  13.5553      |  67.6757      |  39.0307      |  23.3326      |  16.6417      |  13.5553      |
+| energy  | 165.416       | 165.416       | 165.416       | 165.416       | 165.416       | 165.416       |
+* Exper 2,    m=4000,  n=16000, d_block=50, spr=0.05 
+** Coo
+| i       |  11           |   6           |   7           |   8           |   9           |  10           |  11           |
+| epoch   |  94           | 832           | 439           | 244           | 149           | 104           |  94           |
+| p_gap   |   6.10048e-08 |   9.00364e-07 |   8.70436e-07 |   3.86063e-07 |   3.5808e-07  |   8.32805e-08 |   6.10048e-08 |
+| f_gap   |   8.83586e-07 |   6.17119e-07 |   8.6225e-07  |   8.29564e-07 |   8.96415e-07 |   7.23316e-07 |   8.83586e-07 |
+| cpu     |  33.7175      | 289.35        | 153.804       |  87.2013      |  53.0746      |  37.1042      |  33.7175      |
+| elapsed |  33.3908      | 288.772       | 153.478       |  87.2723      |  52.7796      |  36.7629      |  33.3908      |
+| energy  | 165.416       | 165.416       | 165.416       | 165.416       | 165.416       | 165.416       | 165.416       |

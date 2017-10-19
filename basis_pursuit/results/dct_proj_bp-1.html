@@ -1,0 +1,1638 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>Basis pursuit</title>
+<!-- 2017-10-19 Do 11:24 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="Yurii Malitskyi" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+<script type="text/javascript" src="http://orgmode.org/mathjax/MathJax.js"></script>
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+    MathJax.Hub.Config({
+        // Only one of the two following lines, depending on user settings
+        // First allows browser-native MathML display, second forces HTML/CSS
+        //  config: ["MMLorHTML.js"], jax: ["input/TeX"],
+            jax: ["input/TeX", "output/HTML-CSS"],
+        extensions: ["tex2jax.js","TeX/AMSmath.js","TeX/AMSsymbols.js",
+                     "TeX/noUndefined.js"],
+        tex2jax: {
+            inlineMath: [ ["\\(","\\)"] ],
+            displayMath: [ ['$$','$$'], ["\\[","\\]"], ["\\begin{displaymath}","\\end{displaymath}"] ],
+            skipTags: ["script","noscript","style","textarea","pre","code"],
+            ignoreClass: "tex2jax_ignore",
+            processEscapes: false,
+            processEnvironments: true,
+            preview: "TeX"
+        },
+        showProcessingMessages: true,
+        displayAlign: "center",
+        displayIndent: "2em",
+
+        "HTML-CSS": {
+             scale: 100,
+             availableFonts: ["STIX","TeX"],
+             preferredFont: "TeX",
+             webFont: "TeX",
+             imageFont: "TeX",
+             showMathMenu: true,
+        },
+        MMLorHTML: {
+             prefer: {
+                 MSIE:    "MML",
+                 Firefox: "MML",
+                 Opera:   "HTML",
+                 other:   "HTML"
+             }
+        }
+    });
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">Basis pursuit</h1>
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Performance of the primal-dual, block-coordinate and coordinate algorithms. Experiment with a DFT.</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+This documents contains detailed results for the basis pursuit problem
+$$\min ||x||_1 \quad \text{s.t.}\quad Ax=b, $$
+where \(A \in \mathbb{R}^{m\times n}\), \(x\in \mathbb{R}^n\), \(b\in\mathbb{R}^m\)  
+</p>
+
+<p>
+We compare primal-dual algorithm, block-coordinate primal-dual algorithm with batch <code>d_block</code>, and fully coordinate primal-dual algorithm (batch = 1).
+</p>
+
+<p>
+For given \(m,n\) we generate the matrix \(A\in \mathbb{R}^{m\times n}\) as follows: \(A = R\Phi\), where \(\Phi \in \mathbb{R}^{n\times n}\) is the discrete cosine transform and \(R\in \mathbb{R}^{m\times n}\) is the random projection matrix: \(Rx\) randomly extracts \(m\) coordinate from the given \(x\). A sparse vector \(x^\dagger\in \mathbb{R}^n\) is constructed by choosing at random \(50\) of its entries among first \(100\) coordinates independently from the normal distribution \(\mathcal N(0,1)\). The rest entries of \(x^\dagger\) are set to \(0\). Then we generate \(b = Ax^\dagger\). The starting point for all algorithms is \(x^0=0\).  For all methods we use the same stopping criteria:
+</p>
+\begin{equation*}
+||Ax^k-b||_\infty \leq 10^{-6}\quad \text{and}\quad \mathrm{dist}(-A^Ty^k,
+\partial_{||\cdot||_1}(x^k))_\infty\leq 10^{-6}.
+\end{equation*}
+<p>
+This is depicted in <code>p_gap</code> and <code>f_gap</code> in the tables respectively.
+<code>CPU</code> and <code>elapsed</code> measure respectively the CPU time and the wall (elapsed) time of the running algorithms. In fact, we even did not include the time for computing \(||A||\) for PDA.
+<code>Energy</code> means the objective value at the obtained solution for each method.
+</p>
+
+<p>
+All methods were tested with different stepsizes: for PDA we use \(\sigma = \frac{1}{2^i ||A||}\), \(\tau = \frac{2^i}{||A||}\), for \(i=0,\dots, 11\). And for (block-)coordinate we use \(\sigma = \frac{1}{2^i n_{\text{block}}}\). However, for the PDA results in paper we always used the best \(i\) among all, while for the coordinate versions only a fixed \(i=8\) (that was almost always optimal).
+</p>
+</div>
+</div>
+
+
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> Exper 0,    m=1000,  n=4000, d<sub>block</sub>=50, spr=0.05</h2>
+<div class="outline-text-2" id="text-2">
+</div><div id="outline-container-sec-2-1" class="outline-3">
+<h3 id="sec-2-1"><span class="section-number-3">2.1</span> Block-Coo</h3>
+<div class="outline-text-3" id="text-2-1">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="left" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="left">i</td>
+<td class="right">8</td>
+<td class="right">5</td>
+<td class="right">6</td>
+<td class="right">7</td>
+<td class="right">8</td>
+<td class="right">9</td>
+<td class="right">10</td>
+<td class="right">11</td>
+</tr>
+
+<tr>
+<td class="left">epoch</td>
+<td class="right">41</td>
+<td class="right">65</td>
+<td class="right">54</td>
+<td class="right">45</td>
+<td class="right">41</td>
+<td class="right">41</td>
+<td class="right">48</td>
+<td class="right">63</td>
+</tr>
+
+<tr>
+<td class="left">p<sub>gap</sub></td>
+<td class="right">5.67689e-07</td>
+<td class="right">8.11107e-07</td>
+<td class="right">4.35068e-07</td>
+<td class="right">8.92522e-07</td>
+<td class="right">5.67689e-07</td>
+<td class="right">8.59048e-08</td>
+<td class="right">8.90002e-08</td>
+<td class="right">6.66786e-08</td>
+</tr>
+
+<tr>
+<td class="left">f<sub>gap</sub></td>
+<td class="right">5.66431e-07</td>
+<td class="right">7.13926e-07</td>
+<td class="right">9.93515e-07</td>
+<td class="right">4.97429e-07</td>
+<td class="right">5.66431e-07</td>
+<td class="right">7.9979e-07</td>
+<td class="right">1.40767e-07</td>
+<td class="right">6.77861e-07</td>
+</tr>
+
+<tr>
+<td class="left">cpu</td>
+<td class="right">23.8867</td>
+<td class="right">2.32581</td>
+<td class="right">1.80658</td>
+<td class="right">1.68071</td>
+<td class="right">23.8867</td>
+<td class="right">1.69511</td>
+<td class="right">2.22381</td>
+<td class="right">2.43136</td>
+</tr>
+
+<tr>
+<td class="left">elapsed</td>
+<td class="right">8.34886</td>
+<td class="right">0.618992</td>
+<td class="right">0.461673</td>
+<td class="right">0.44618</td>
+<td class="right">8.34886</td>
+<td class="right">0.452809</td>
+<td class="right">0.623194</td>
+<td class="right">0.653174</td>
+</tr>
+
+<tr>
+<td class="left">energy</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> Exper 0,    m=1000,  n=4000, d<sub>block</sub>=50, spr=0.05</h2>
+<div class="outline-text-2" id="text-3">
+</div><div id="outline-container-sec-3-1" class="outline-3">
+<h3 id="sec-3-1"><span class="section-number-3">3.1</span> Coo</h3>
+<div class="outline-text-3" id="text-3-1">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="left" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="left">i</td>
+<td class="right">8</td>
+<td class="right">4</td>
+<td class="right">5</td>
+<td class="right">6</td>
+<td class="right">7</td>
+<td class="right">8</td>
+<td class="right">9</td>
+<td class="right">10</td>
+<td class="right">11</td>
+</tr>
+
+<tr>
+<td class="left">epoch</td>
+<td class="right">27</td>
+<td class="right">64</td>
+<td class="right">44</td>
+<td class="right">33</td>
+<td class="right">29</td>
+<td class="right">27</td>
+<td class="right">28</td>
+<td class="right">34</td>
+<td class="right">53</td>
+</tr>
+
+<tr>
+<td class="left">p<sub>gap</sub></td>
+<td class="right">5.65104e-07</td>
+<td class="right">3.98071e-07</td>
+<td class="right">8.43903e-07</td>
+<td class="right">9.08117e-07</td>
+<td class="right">4.19479e-07</td>
+<td class="right">5.65104e-07</td>
+<td class="right">1.52484e-07</td>
+<td class="right">2.88185e-08</td>
+<td class="right">3.07814e-08</td>
+</tr>
+
+<tr>
+<td class="left">f<sub>gap</sub></td>
+<td class="right">9.16513e-07</td>
+<td class="right">8.34556e-08</td>
+<td class="right">2.06049e-07</td>
+<td class="right">2.80568e-07</td>
+<td class="right">4.27604e-07</td>
+<td class="right">9.16513e-07</td>
+<td class="right">7.39547e-07</td>
+<td class="right">7.87908e-07</td>
+<td class="right">5.96385e-07</td>
+</tr>
+
+<tr>
+<td class="left">cpu</td>
+<td class="right">0.914773</td>
+<td class="right">2.16997</td>
+<td class="right">1.52963</td>
+<td class="right">1.14663</td>
+<td class="right">1.08687</td>
+<td class="right">0.914773</td>
+<td class="right">0.949261</td>
+<td class="right">1.1484</td>
+<td class="right">1.72536</td>
+</tr>
+
+<tr>
+<td class="left">elapsed</td>
+<td class="right">0.895559</td>
+<td class="right">2.09238</td>
+<td class="right">1.46565</td>
+<td class="right">1.10069</td>
+<td class="right">1.03927</td>
+<td class="right">0.895559</td>
+<td class="right">0.924333</td>
+<td class="right">1.13026</td>
+<td class="right">1.69705</td>
+</tr>
+
+<tr>
+<td class="left">energy</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> Exper 0,    m=1000,  n=4000, d<sub>block</sub>=50, spr=0.05</h2>
+<div class="outline-text-2" id="text-4">
+</div><div id="outline-container-sec-4-1" class="outline-3">
+<h3 id="sec-4-1"><span class="section-number-3">4.1</span> PDA</h3>
+<div class="outline-text-3" id="text-4-1">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="left" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="left">i</td>
+<td class="right">2</td>
+<td class="right">0</td>
+<td class="right">1</td>
+<td class="right">2</td>
+<td class="right">3</td>
+<td class="right">4</td>
+<td class="right">5</td>
+<td class="right">6</td>
+</tr>
+
+<tr>
+<td class="left">epoch</td>
+<td class="right">303</td>
+<td class="right">330</td>
+<td class="right">306</td>
+<td class="right">303</td>
+<td class="right">313</td>
+<td class="right">324</td>
+<td class="right">331</td>
+<td class="right">376</td>
+</tr>
+
+<tr>
+<td class="left">p<sub>gap</sub></td>
+<td class="right">4.27001e-07</td>
+<td class="right">8.8769e-07</td>
+<td class="right">9.13188e-07</td>
+<td class="right">4.27001e-07</td>
+<td class="right">1.97158e-07</td>
+<td class="right">1.17819e-07</td>
+<td class="right">8.9658e-08</td>
+<td class="right">3.02942e-08</td>
+</tr>
+
+<tr>
+<td class="left">f<sub>gap</sub></td>
+<td class="right">9.31684e-07</td>
+<td class="right">6.90364e-07</td>
+<td class="right">8.32618e-07</td>
+<td class="right">9.31684e-07</td>
+<td class="right">7.29652e-07</td>
+<td class="right">8.1289e-07</td>
+<td class="right">7.89297e-07</td>
+<td class="right">9.80951e-07</td>
+</tr>
+
+<tr>
+<td class="left">cpu</td>
+<td class="right">9.39137</td>
+<td class="right">10.328</td>
+<td class="right">9.40755</td>
+<td class="right">9.39137</td>
+<td class="right">9.76629</td>
+<td class="right">9.91843</td>
+<td class="right">14.0836</td>
+<td class="right">13.2583</td>
+</tr>
+
+<tr>
+<td class="left">elapsed</td>
+<td class="right">2.49548</td>
+<td class="right">2.74966</td>
+<td class="right">2.45746</td>
+<td class="right">2.49548</td>
+<td class="right">2.68798</td>
+<td class="right">2.60076</td>
+<td class="right">4.90906</td>
+<td class="right">4.14482</td>
+</tr>
+
+<tr>
+<td class="left">energy</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> Exper 0,    m=1000,  n=4000, d<sub>block</sub>=50, spr=0.05</h2>
+<div class="outline-text-2" id="text-5">
+</div><div id="outline-container-sec-5-1" class="outline-3">
+<h3 id="sec-5-1"><span class="section-number-3">5.1</span> Block-Coo</h3>
+<div class="outline-text-3" id="text-5-1">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="left" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="left">i</td>
+<td class="right">8</td>
+<td class="right">2</td>
+<td class="right">3</td>
+<td class="right">4</td>
+<td class="right">5</td>
+<td class="right">6</td>
+<td class="right">7</td>
+<td class="right">8</td>
+<td class="right">9</td>
+<td class="right">10</td>
+</tr>
+
+<tr>
+<td class="left">epoch</td>
+<td class="right">41</td>
+<td class="right">294</td>
+<td class="right">163</td>
+<td class="right">101</td>
+<td class="right">65</td>
+<td class="right">54</td>
+<td class="right">45</td>
+<td class="right">41</td>
+<td class="right">41</td>
+<td class="right">48</td>
+</tr>
+
+<tr>
+<td class="left">p<sub>gap</sub></td>
+<td class="right">5.67689e-07</td>
+<td class="right">4.05175e-07</td>
+<td class="right">6.08853e-07</td>
+<td class="right">6.89425e-07</td>
+<td class="right">8.11107e-07</td>
+<td class="right">4.35068e-07</td>
+<td class="right">8.92522e-07</td>
+<td class="right">5.67689e-07</td>
+<td class="right">8.59048e-08</td>
+<td class="right">8.90002e-08</td>
+</tr>
+
+<tr>
+<td class="left">f<sub>gap</sub></td>
+<td class="right">5.66431e-07</td>
+<td class="right">5.40974e-08</td>
+<td class="right">6.64792e-08</td>
+<td class="right">4.75816e-07</td>
+<td class="right">7.13926e-07</td>
+<td class="right">9.93515e-07</td>
+<td class="right">4.97429e-07</td>
+<td class="right">5.66431e-07</td>
+<td class="right">7.9979e-07</td>
+<td class="right">1.40767e-07</td>
+</tr>
+
+<tr>
+<td class="left">cpu</td>
+<td class="right">1.48564</td>
+<td class="right">9.03866</td>
+<td class="right">5.43047</td>
+<td class="right">3.10614</td>
+<td class="right">4.35775</td>
+<td class="right">1.80268</td>
+<td class="right">1.48378</td>
+<td class="right">1.48564</td>
+<td class="right">1.41832</td>
+<td class="right">2.33995</td>
+</tr>
+
+<tr>
+<td class="left">elapsed</td>
+<td class="right">0.384196</td>
+<td class="right">2.34052</td>
+<td class="right">1.42661</td>
+<td class="right">0.788742</td>
+<td class="right">1.31895</td>
+<td class="right">0.460087</td>
+<td class="right">0.375131</td>
+<td class="right">0.384196</td>
+<td class="right">0.359904</td>
+<td class="right">0.666734</td>
+</tr>
+
+<tr>
+<td class="left">energy</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-6" class="outline-2">
+<h2 id="sec-6"><span class="section-number-2">6</span> Exper 0,    m=1000,  n=4000, d<sub>block</sub>=50, spr=0.05</h2>
+<div class="outline-text-2" id="text-6">
+</div><div id="outline-container-sec-6-1" class="outline-3">
+<h3 id="sec-6-1"><span class="section-number-3">6.1</span> Coo</h3>
+<div class="outline-text-3" id="text-6-1">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="left" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="left">i</td>
+<td class="right">8</td>
+<td class="right">1</td>
+<td class="right">2</td>
+<td class="right">3</td>
+<td class="right">4</td>
+<td class="right">5</td>
+<td class="right">6</td>
+<td class="right">7</td>
+<td class="right">8</td>
+<td class="right">9</td>
+<td class="right">10</td>
+</tr>
+
+<tr>
+<td class="left">epoch</td>
+<td class="right">27</td>
+<td class="right">374</td>
+<td class="right">198</td>
+<td class="right">109</td>
+<td class="right">64</td>
+<td class="right">44</td>
+<td class="right">33</td>
+<td class="right">29</td>
+<td class="right">27</td>
+<td class="right">28</td>
+<td class="right">34</td>
+</tr>
+
+<tr>
+<td class="left">p<sub>gap</sub></td>
+<td class="right">5.65104e-07</td>
+<td class="right">4.21753e-07</td>
+<td class="right">4.03827e-07</td>
+<td class="right">3.92354e-07</td>
+<td class="right">3.98071e-07</td>
+<td class="right">8.43903e-07</td>
+<td class="right">9.08117e-07</td>
+<td class="right">4.19479e-07</td>
+<td class="right">5.65104e-07</td>
+<td class="right">1.52484e-07</td>
+<td class="right">2.88185e-08</td>
+</tr>
+
+<tr>
+<td class="left">f<sub>gap</sub></td>
+<td class="right">9.16513e-07</td>
+<td class="right">6.88874e-09</td>
+<td class="right">2.51554e-08</td>
+<td class="right">2.55433e-08</td>
+<td class="right">8.34556e-08</td>
+<td class="right">2.06049e-07</td>
+<td class="right">2.80568e-07</td>
+<td class="right">4.27604e-07</td>
+<td class="right">9.16513e-07</td>
+<td class="right">7.39547e-07</td>
+<td class="right">7.87908e-07</td>
+</tr>
+
+<tr>
+<td class="left">cpu</td>
+<td class="right">0.91657</td>
+<td class="right">11.6939</td>
+<td class="right">6.25326</td>
+<td class="right">3.57095</td>
+<td class="right">2.15035</td>
+<td class="right">1.48448</td>
+<td class="right">1.14441</td>
+<td class="right">1.02556</td>
+<td class="right">0.91657</td>
+<td class="right">0.962139</td>
+<td class="right">1.11096</td>
+</tr>
+
+<tr>
+<td class="left">elapsed</td>
+<td class="right">0.899602</td>
+<td class="right">11.5384</td>
+<td class="right">6.1423</td>
+<td class="right">3.45179</td>
+<td class="right">2.06384</td>
+<td class="right">1.41922</td>
+<td class="right">1.10247</td>
+<td class="right">0.980831</td>
+<td class="right">0.899602</td>
+<td class="right">0.935606</td>
+<td class="right">1.09094</td>
+</tr>
+
+<tr>
+<td class="left">energy</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+<td class="right">7.62043</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-7" class="outline-2">
+<h2 id="sec-7"><span class="section-number-2">7</span> Exper 1,    m=2000,  n=8000, d<sub>block</sub>=50, spr=0.05</h2>
+<div class="outline-text-2" id="text-7">
+</div><div id="outline-container-sec-7-1" class="outline-3">
+<h3 id="sec-7-1"><span class="section-number-3">7.1</span> PDA</h3>
+<div class="outline-text-3" id="text-7-1">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="left" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="left">i</td>
+<td class="right">2</td>
+<td class="right">0</td>
+<td class="right">1</td>
+<td class="right">2</td>
+<td class="right">3</td>
+<td class="right">4</td>
+<td class="right">5</td>
+<td class="right">6</td>
+<td class="right">7</td>
+</tr>
+
+<tr>
+<td class="left">epoch</td>
+<td class="right">284</td>
+<td class="right">322</td>
+<td class="right">298</td>
+<td class="right">284</td>
+<td class="right">286</td>
+<td class="right">303</td>
+<td class="right">303</td>
+<td class="right">305</td>
+<td class="right">342</td>
+</tr>
+
+<tr>
+<td class="left">p<sub>gap</sub></td>
+<td class="right">9.0863e-07</td>
+<td class="right">8.92281e-07</td>
+<td class="right">9.81536e-07</td>
+<td class="right">9.0863e-07</td>
+<td class="right">3.55241e-07</td>
+<td class="right">1.88348e-07</td>
+<td class="right">1.14117e-07</td>
+<td class="right">6.31641e-08</td>
+<td class="right">1.51442e-08</td>
+</tr>
+
+<tr>
+<td class="left">f<sub>gap</sub></td>
+<td class="right">9.04274e-07</td>
+<td class="right">5.12766e-07</td>
+<td class="right">6.33814e-07</td>
+<td class="right">9.04274e-07</td>
+<td class="right">9.10398e-07</td>
+<td class="right">6.79767e-07</td>
+<td class="right">8.60702e-07</td>
+<td class="right">9.04582e-07</td>
+<td class="right">9.88405e-07</td>
+</tr>
+
+<tr>
+<td class="left">cpu</td>
+<td class="right">29.6011</td>
+<td class="right">35.4018</td>
+<td class="right">32.7554</td>
+<td class="right">29.6011</td>
+<td class="right">28.0162</td>
+<td class="right">33.4176</td>
+<td class="right">33.6511</td>
+<td class="right">33.6163</td>
+<td class="right">37.7819</td>
+</tr>
+
+<tr>
+<td class="left">elapsed</td>
+<td class="right">9.59614</td>
+<td class="right">9.73139</td>
+<td class="right">9.18173</td>
+<td class="right">9.59614</td>
+<td class="right">10.6242</td>
+<td class="right">9.24566</td>
+<td class="right">9.17058</td>
+<td class="right">9.40437</td>
+<td class="right">10.4486</td>
+</tr>
+
+<tr>
+<td class="left">energy</td>
+<td class="right">8.54737</td>
+<td class="right">8.54737</td>
+<td class="right">8.54737</td>
+<td class="right">8.54737</td>
+<td class="right">8.54737</td>
+<td class="right">8.54737</td>
+<td class="right">8.54737</td>
+<td class="right">8.54737</td>
+<td class="right">8.54737</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-8" class="outline-2">
+<h2 id="sec-8"><span class="section-number-2">8</span> Exper 1,    m=2000,  n=8000, d<sub>block</sub>=50, spr=0.05</h2>
+<div class="outline-text-2" id="text-8">
+</div><div id="outline-container-sec-8-1" class="outline-3">
+<h3 id="sec-8-1"><span class="section-number-3">8.1</span> Block-Coo</h3>
+<div class="outline-text-3" id="text-8-1">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="left" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="left">i</td>
+<td class="right">9</td>
+<td class="right">2</td>
+<td class="right">3</td>
+<td class="right">4</td>
+<td class="right">5</td>
+<td class="right">6</td>
+<td class="right">7</td>
+<td class="right">8</td>
+<td class="right">9</td>
+<td class="right">10</td>
+</tr>
+
+<tr>
+<td class="left">epoch</td>
+<td class="right">38</td>
+<td class="right">373</td>
+<td class="right">199</td>
+<td class="right">115</td>
+<td class="right">74</td>
+<td class="right">50</td>
+<td class="right">42</td>
+<td class="right">40</td>
+<td class="right">38</td>
+<td class="right">40</td>
+</tr>
+
+<tr>
+<td class="left">p<sub>gap</sub></td>
+<td class="right">4.78721e-07</td>
+<td class="right">3.20761e-07</td>
+<td class="right">9.83678e-07</td>
+<td class="right">8.88045e-07</td>
+<td class="right">7.03728e-07</td>
+<td class="right">7.87722e-07</td>
+<td class="right">5.16446e-07</td>
+<td class="right">6.27702e-07</td>
+<td class="right">4.78721e-07</td>
+<td class="right">1.16228e-07</td>
+</tr>
+
+<tr>
+<td class="left">f<sub>gap</sub></td>
+<td class="right">7.41858e-07</td>
+<td class="right">1.40962e-08</td>
+<td class="right">1.26472e-07</td>
+<td class="right">4.53004e-08</td>
+<td class="right">1.03821e-07</td>
+<td class="right">6.89916e-07</td>
+<td class="right">6.28916e-07</td>
+<td class="right">8.55003e-07</td>
+<td class="right">7.41858e-07</td>
+<td class="right">8.4207e-07</td>
+</tr>
+
+<tr>
+<td class="left">cpu</td>
+<td class="right">5.36683</td>
+<td class="right">51.9568</td>
+<td class="right">87.5665</td>
+<td class="right">12.9159</td>
+<td class="right">8.7643</td>
+<td class="right">6.51552</td>
+<td class="right">5.06658</td>
+<td class="right">4.8623</td>
+<td class="right">5.36683</td>
+<td class="right">5.54449</td>
+</tr>
+
+<tr>
+<td class="left">elapsed</td>
+<td class="right">1.43857</td>
+<td class="right">14.5583</td>
+<td class="right">29.249</td>
+<td class="right">3.33305</td>
+<td class="right">2.26284</td>
+<td class="right">1.71397</td>
+<td class="right">1.2794</td>
+<td class="right">1.24066</td>
+<td class="right">1.43857</td>
+<td class="right">1.47741</td>
+</tr>
+
+<tr>
+<td class="left">energy</td>
+<td class="right">8.54737</td>
+<td class="right">8.54737</td>
+<td class="right">8.54737</td>
+<td class="right">8.54737</td>
+<td class="right">8.54737</td>
+<td class="right">8.54737</td>
+<td class="right">8.54737</td>
+<td class="right">8.54737</td>
+<td class="right">8.54737</td>
+<td class="right">8.54737</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-9" class="outline-2">
+<h2 id="sec-9"><span class="section-number-2">9</span> Exper 1,    m=2000,  n=8000, d<sub>block</sub>=50, spr=0.05</h2>
+<div class="outline-text-2" id="text-9">
+</div><div id="outline-container-sec-9-1" class="outline-3">
+<h3 id="sec-9-1"><span class="section-number-3">9.1</span> Coo</h3>
+<div class="outline-text-3" id="text-9-1">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="left" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="left">i</td>
+<td class="right">8</td>
+<td class="right">2</td>
+<td class="right">3</td>
+<td class="right">4</td>
+<td class="right">5</td>
+<td class="right">6</td>
+<td class="right">7</td>
+<td class="right">8</td>
+<td class="right">9</td>
+<td class="right">10</td>
+</tr>
+
+<tr>
+<td class="left">epoch</td>
+<td class="right">23</td>
+<td class="right">270</td>
+<td class="right">146</td>
+<td class="right">84</td>
+<td class="right">50</td>
+<td class="right">35</td>
+<td class="right">28</td>
+<td class="right">23</td>
+<td class="right">23</td>
+<td class="right">23</td>
+</tr>
+
+<tr>
+<td class="left">p<sub>gap</sub></td>
+<td class="right">4.61941e-07</td>
+<td class="right">4.03467e-07</td>
+<td class="right">6.88159e-07</td>
+<td class="right">6.96791e-07</td>
+<td class="right">5.65409e-07</td>
+<td class="right">9.00993e-07</td>
+<td class="right">6.76092e-07</td>
+<td class="right">4.61941e-07</td>
+<td class="right">2.86477e-07</td>
+<td class="right">9.44575e-08</td>
+</tr>
+
+<tr>
+<td class="left">f<sub>gap</sub></td>
+<td class="right">9.85821e-07</td>
+<td class="right">8.29402e-09</td>
+<td class="right">1.31866e-08</td>
+<td class="right">4.83423e-08</td>
+<td class="right">1.8168e-07</td>
+<td class="right">3.14384e-07</td>
+<td class="right">4.23766e-07</td>
+<td class="right">9.85821e-07</td>
+<td class="right">7.88371e-07</td>
+<td class="right">6.4057e-07</td>
+</tr>
+
+<tr>
+<td class="left">cpu</td>
+<td class="right">2.62474</td>
+<td class="right">29.1</td>
+<td class="right">15.12</td>
+<td class="right">9.28983</td>
+<td class="right">5.44906</td>
+<td class="right">3.87223</td>
+<td class="right">3.25201</td>
+<td class="right">2.62474</td>
+<td class="right">2.61964</td>
+<td class="right">2.62277</td>
+</tr>
+
+<tr>
+<td class="left">elapsed</td>
+<td class="right">2.55208</td>
+<td class="right">28.8462</td>
+<td class="right">14.7952</td>
+<td class="right">9.00466</td>
+<td class="right">5.27971</td>
+<td class="right">3.73374</td>
+<td class="right">3.13303</td>
+<td class="right">2.55208</td>
+<td class="right">2.52728</td>
+<td class="right">2.53414</td>
+</tr>
+
+<tr>
+<td class="left">energy</td>
+<td class="right">8.54737</td>
+<td class="right">8.54737</td>
+<td class="right">8.54737</td>
+<td class="right">8.54737</td>
+<td class="right">8.54737</td>
+<td class="right">8.54737</td>
+<td class="right">8.54737</td>
+<td class="right">8.54737</td>
+<td class="right">8.54737</td>
+<td class="right">8.54737</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-10" class="outline-2">
+<h2 id="sec-10"><span class="section-number-2">10</span> Exper 2,    m=4000,  n=16000, d<sub>block</sub>=50, spr=0.05</h2>
+<div class="outline-text-2" id="text-10">
+</div><div id="outline-container-sec-10-1" class="outline-3">
+<h3 id="sec-10-1"><span class="section-number-3">10.1</span> PDA</h3>
+<div class="outline-text-3" id="text-10-1">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="left" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="left">i</td>
+<td class="right">3</td>
+<td class="right">0</td>
+<td class="right">1</td>
+<td class="right">2</td>
+<td class="right">3</td>
+<td class="right">4</td>
+<td class="right">5</td>
+<td class="right">6</td>
+</tr>
+
+<tr>
+<td class="left">epoch</td>
+<td class="right">286</td>
+<td class="right">316</td>
+<td class="right">302</td>
+<td class="right">292</td>
+<td class="right">286</td>
+<td class="right">295</td>
+<td class="right">294</td>
+<td class="right">307</td>
+</tr>
+
+<tr>
+<td class="left">p<sub>gap</sub></td>
+<td class="right">8.39343e-07</td>
+<td class="right">4.27113e-07</td>
+<td class="right">4.82155e-07</td>
+<td class="right">9.64117e-07</td>
+<td class="right">8.39343e-07</td>
+<td class="right">7.64577e-07</td>
+<td class="right">3.97099e-07</td>
+<td class="right">1.47015e-07</td>
+</tr>
+
+<tr>
+<td class="left">f<sub>gap</sub></td>
+<td class="right">6.99379e-07</td>
+<td class="right">8.73537e-07</td>
+<td class="right">8.86801e-07</td>
+<td class="right">6.05509e-07</td>
+<td class="right">6.99379e-07</td>
+<td class="right">9.90924e-07</td>
+<td class="right">9.17247e-07</td>
+<td class="right">8.7053e-07</td>
+</tr>
+
+<tr>
+<td class="left">cpu</td>
+<td class="right">121.585</td>
+<td class="right">134.138</td>
+<td class="right">126.824</td>
+<td class="right">115.27</td>
+<td class="right">121.585</td>
+<td class="right">125.828</td>
+<td class="right">119.192</td>
+<td class="right">129.058</td>
+</tr>
+
+<tr>
+<td class="left">elapsed</td>
+<td class="right">34.1958</td>
+<td class="right">37.3816</td>
+<td class="right">35.8634</td>
+<td class="right">35.4983</td>
+<td class="right">34.1958</td>
+<td class="right">34.8403</td>
+<td class="right">35.7634</td>
+<td class="right">36.632</td>
+</tr>
+
+<tr>
+<td class="left">energy</td>
+<td class="right">7.12459</td>
+<td class="right">7.12459</td>
+<td class="right">7.12459</td>
+<td class="right">7.12459</td>
+<td class="right">7.12459</td>
+<td class="right">7.12459</td>
+<td class="right">7.12459</td>
+<td class="right">7.12459</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-11" class="outline-2">
+<h2 id="sec-11"><span class="section-number-2">11</span> Exper 2,    m=4000,  n=16000, d<sub>block</sub>=50, spr=0.05</h2>
+<div class="outline-text-2" id="text-11">
+</div><div id="outline-container-sec-11-1" class="outline-3">
+<h3 id="sec-11-1"><span class="section-number-3">11.1</span> Block-Coo</h3>
+<div class="outline-text-3" id="text-11-1">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="left" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="left">i</td>
+<td class="right">10</td>
+<td class="right">3</td>
+<td class="right">4</td>
+<td class="right">5</td>
+<td class="right">6</td>
+<td class="right">7</td>
+<td class="right">8</td>
+<td class="right">9</td>
+<td class="right">10</td>
+</tr>
+
+<tr>
+<td class="left">epoch</td>
+<td class="right">33</td>
+<td class="right">221</td>
+<td class="right">123</td>
+<td class="right">78</td>
+<td class="right">54</td>
+<td class="right">42</td>
+<td class="right">36</td>
+<td class="right">35</td>
+<td class="right">33</td>
+</tr>
+
+<tr>
+<td class="left">p<sub>gap</sub></td>
+<td class="right">1.53575e-07</td>
+<td class="right">4.27194e-07</td>
+<td class="right">7.68539e-07</td>
+<td class="right">5.90985e-07</td>
+<td class="right">7.16267e-07</td>
+<td class="right">7.77032e-07</td>
+<td class="right">5.5705e-07</td>
+<td class="right">7.75535e-07</td>
+<td class="right">1.53575e-07</td>
+</tr>
+
+<tr>
+<td class="left">f<sub>gap</sub></td>
+<td class="right">2.72497e-07</td>
+<td class="right">1.98803e-08</td>
+<td class="right">4.99005e-08</td>
+<td class="right">2.40748e-07</td>
+<td class="right">8.91116e-08</td>
+<td class="right">3.66485e-07</td>
+<td class="right">5.78343e-07</td>
+<td class="right">8.49485e-07</td>
+<td class="right">2.72497e-07</td>
+</tr>
+
+<tr>
+<td class="left">cpu</td>
+<td class="right">17.2657</td>
+<td class="right">95.6954</td>
+<td class="right">55.2353</td>
+<td class="right">36.1613</td>
+<td class="right">26.7899</td>
+<td class="right">20.6567</td>
+<td class="right">17.8942</td>
+<td class="right">17.6124</td>
+<td class="right">17.2657</td>
+</tr>
+
+<tr>
+<td class="left">elapsed</td>
+<td class="right">4.54658</td>
+<td class="right">24.7875</td>
+<td class="right">14.3148</td>
+<td class="right">9.41767</td>
+<td class="right">7.02242</td>
+<td class="right">5.36628</td>
+<td class="right">4.62138</td>
+<td class="right">4.59101</td>
+<td class="right">4.54658</td>
+</tr>
+
+<tr>
+<td class="left">energy</td>
+<td class="right">7.12459</td>
+<td class="right">7.12459</td>
+<td class="right">7.12459</td>
+<td class="right">7.12459</td>
+<td class="right">7.12459</td>
+<td class="right">7.12459</td>
+<td class="right">7.12459</td>
+<td class="right">7.12459</td>
+<td class="right">7.12459</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-12" class="outline-2">
+<h2 id="sec-12"><span class="section-number-2">12</span> Exper 2,    m=4000,  n=16000, d<sub>block</sub>=50, spr=0.05</h2>
+<div class="outline-text-2" id="text-12">
+</div><div id="outline-container-sec-12-1" class="outline-3">
+<h3 id="sec-12-1"><span class="section-number-3">12.1</span> Coo</h3>
+<div class="outline-text-3" id="text-12-1">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="left" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="left">i</td>
+<td class="right">9</td>
+<td class="right">2</td>
+<td class="right">3</td>
+<td class="right">4</td>
+<td class="right">5</td>
+<td class="right">6</td>
+<td class="right">7</td>
+<td class="right">8</td>
+<td class="right">9</td>
+<td class="right">10</td>
+</tr>
+
+<tr>
+<td class="left">epoch</td>
+<td class="right">22</td>
+<td class="right">302</td>
+<td class="right">159</td>
+<td class="right">90</td>
+<td class="right">53</td>
+<td class="right">37</td>
+<td class="right">29</td>
+<td class="right">24</td>
+<td class="right">22</td>
+<td class="right">23</td>
+</tr>
+
+<tr>
+<td class="left">p<sub>gap</sub></td>
+<td class="right">2.9136e-07</td>
+<td class="right">6.44435e-07</td>
+<td class="right">6.77139e-07</td>
+<td class="right">6.4828e-07</td>
+<td class="right">5.4165e-07</td>
+<td class="right">7.18847e-07</td>
+<td class="right">3.97501e-07</td>
+<td class="right">8.46231e-07</td>
+<td class="right">2.9136e-07</td>
+<td class="right">1.73937e-07</td>
+</tr>
+
+<tr>
+<td class="left">f<sub>gap</sub></td>
+<td class="right">6.54183e-07</td>
+<td class="right">1.33066e-08</td>
+<td class="right">1.13031e-08</td>
+<td class="right">1.96219e-08</td>
+<td class="right">6.10034e-08</td>
+<td class="right">1.7334e-07</td>
+<td class="right">1.72696e-07</td>
+<td class="right">8.64039e-07</td>
+<td class="right">6.54183e-07</td>
+<td class="right">5.53877e-07</td>
+</tr>
+
+<tr>
+<td class="left">cpu</td>
+<td class="right">9.15089</td>
+<td class="right">110.959</td>
+<td class="right">58.0382</td>
+<td class="right">34.2398</td>
+<td class="right">20.7098</td>
+<td class="right">14.9587</td>
+<td class="right">12.2783</td>
+<td class="right">9.69518</td>
+<td class="right">9.15089</td>
+<td class="right">9.29665</td>
+</tr>
+
+<tr>
+<td class="left">elapsed</td>
+<td class="right">8.81256</td>
+<td class="right">109.687</td>
+<td class="right">57.0582</td>
+<td class="right">33.2863</td>
+<td class="right">19.9365</td>
+<td class="right">14.1226</td>
+<td class="right">11.7779</td>
+<td class="right">9.39712</td>
+<td class="right">8.81256</td>
+<td class="right">8.96354</td>
+</tr>
+
+<tr>
+<td class="left">energy</td>
+<td class="right">7.12459</td>
+<td class="right">7.12459</td>
+<td class="right">7.12459</td>
+<td class="right">7.12459</td>
+<td class="right">7.12459</td>
+<td class="right">7.12459</td>
+<td class="right">7.12459</td>
+<td class="right">7.12459</td>
+<td class="right">7.12459</td>
+<td class="right">7.12459</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Yurii Malitskyi</p>
+<p class="date">Created: 2017-10-19 Do 11:24</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

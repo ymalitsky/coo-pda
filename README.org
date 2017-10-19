@@ -1,0 +1,27 @@
+#+OPTIONS: toc:nil
+#+OPTIONS: num:nil
+
+* About
+This is a supplementary code (in Python 3.5) for the paper R. Luke and Y. Malitsky "Coordinate primal-dual method for the nonsmooth minimization over linear constraints"
+
+* Usage
+There are 3 problems: basis pursuit, noisy basis pursuit and robust principal component analysis; for each problem there is an independent folder.
+
+** Basis pursuit
+The folder contains codes for the primal-dual and coordinate primal-dual algorithms. In order to reproduce the results obtained in the paper, one needs to run =basis_pursuit.py=. The results will be written in the folder =results= in org-format. (If you use Emacs, it is easy to transform them into html files). The original html files are included.
+
+** Basis pursuit with noise
+Since the results for these problem are mostly plots, in order to see them you have to run =Noisy Basis Pursuit.ipynb= in the Jupyter notebook.
+
+** Robust PCA
+There is only one file =robust_pca.py= that you have to run in order to see the results. The results will be written to the folder =results= in org-format. The original html files are also included.
+
+
+* Dependencies
+
+The most important thing that you need for running code for the first two problems is [[http://numba.pydata.org/][Numba]] library. It produces an optimized machine code using the LLVM compiler. It might be somehow complicated to install it for your system. We recommend to use it either using 
+[[https://www.anaconda.com/distribution/][Anaconda distribution]]  or [[https://github.com/NixOS/nixpkgs/blob/master/doc/languages-frameworks/python.md][NixOS packages]] for python. The reason to use Numba for the coordinate versions of the primal-dual algorithm is obvious: one epoch of the standard primal-dual algorithm (which is in fact just one iteration) is based only on the fast numpy (already precompiled) functions. However, one epoch of the coordinate PDA will need to use =for loop= which is of course much slower. Hence, to have a fair comparison, we need the most expensive operations for both methods to have pre-compiled.
+If you encounter problems while installing Numba, you still can use this code. You just need to comment the decorators of Numba in all files. It is  the following line ~@jit(nopython=True, nogil=True, cache=True)~. But of course now the results relating cpu time will be different.
+
+
+Another maybe non-standard library is =tabulate=. We use it only for formatting the results in org-mode form. This one is easy to install.
