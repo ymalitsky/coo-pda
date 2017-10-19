@@ -21,6 +21,7 @@ There is only one file =robust_pca.py= that you have to run in order to see the 
 
 The most important thing that you need for running code for the first two problems is [[http://numba.pydata.org/][Numba]] library. It produces an optimized machine code using the LLVM compiler. It might be somehow complicated to install it for your system. We recommend to use it either using 
 [[https://www.anaconda.com/distribution/][Anaconda distribution]]  or [[https://github.com/NixOS/nixpkgs/blob/master/doc/languages-frameworks/python.md][NixOS packages]] for python. The reason to use Numba for the coordinate versions of the primal-dual algorithm is obvious: one epoch of the standard primal-dual algorithm (which is in fact just one iteration) is based only on the fast numpy (already precompiled) functions. However, one epoch of the coordinate PDA will need to use =for loop= which is of course much slower. Hence, to have a fair comparison, we need the most expensive operations for both methods to have pre-compiled.
+
 If you encounter problems while installing Numba, you still can use this code. You just need to comment the decorators of Numba in all files. It is  the following line ~@jit(nopython=True, nogil=True, cache=True)~. But of course now the results relating cpu time will be different.
 
 
