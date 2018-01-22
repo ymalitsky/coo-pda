@@ -2,7 +2,7 @@
 #+OPTIONS: num:nil
 
 * About
-This is a supplementary code (in Python 3.5) for the paper R. Luke and Y. Malitsky "Coordinate primal-dual method for the nonsmooth minimization over linear constraints"
+This is a supplementary code (in Python 3.5) for the paper R. Luke and Y. Malitsky "Block-coordinate primal-dual method for the nonsmooth minimization over linear constraints"
 
 * Usage
 There are 3 problems: basis pursuit, noisy basis pursuit and robust principal component analysis; for each problem there is an independent folder.
